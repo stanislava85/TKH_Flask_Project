@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Flask('webapp')
-URL = 'https://worldpopulationreview.com/country-rankings/maternity-leave-by-country'  #lab 1 ex 3
+URL = 'https://worldpopulationreview.com/country-rankings/maternity-leave-by-country'  #lab 2 ex 3
 page = requests.get(URL)
 soup = BeautifulSoup(page.content)
 
