@@ -1,15 +1,36 @@
-from flask import Flask
-import requests
-from bs4 import BeautifulSoup
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask('webapp')
-URL = 'https://worldpopulationreview.com/country-rankings/maternity-leave-by-country'  #lab 1 ex 3
-page = requests.get(URL)
-soup = BeautifulSoup(page.content)
 
-@app.route('/')     #lab 1 ex 3
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ds_course_database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    
+    def __repr__(self):
+        return f"<User {self.id} {self.name}>" 
+
+@app.route('/')
 def home():
-    return soup.prettify()  
+    usrs = User.query.all()
+    return render_template("home.html", users=usrs) 
+
+@app.route('/contact', methods=["GET", "POST"])
+def contact():
+    if request.method == 'POST':
+        un = request.form["name"]
+        ms = request.form["message"]
+        user = User(username=un, message=ms)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template("contact.html")
 
 import math
 @app.route('/sqrt/<num>')
@@ -37,4 +58,6 @@ def login():
 
 
 if __name__ == '__main__':
+    db.drop_all()
+    db.create_all()
     app.run(debug=True)
